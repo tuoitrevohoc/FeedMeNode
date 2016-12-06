@@ -19,20 +19,3 @@ export interface User extends AppModel {
    */
   avatar?: string;
 }
-
-/**
- * the login result
- */
-export interface LoginResult {
-
-  /**
-   * the logged in user
-   */
-  user: User;
-
-  /**
-   * the access token
-   */
-  token: string;
-}
-

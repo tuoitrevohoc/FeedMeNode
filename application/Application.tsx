@@ -1,111 +1,64 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-
-import {ModuleDefinition} from "./common/components/ModuleDefinition";
-import {NavigationBar} from "./components/NavigationBar";
-import {SidebarMenu} from "./components/SidebarMenu";
-import {appData} from "./stores/AppData";
-import {Menu} from "./common/ui/Menu";
-import {Route, Router} from "react-router";
-import UserManagementModule from "./modules/user-managerment";
-import {browserHistory} from "./common/ui/index";
+import {HelloWorldService} from "./services/HelloWorldService";
 
 /**
- * Application component
+ * The state
  */
-export class Application extends React.Component<{}, {}> {
+interface HelloWorldComponentState {
 
   /**
-   * component will mount
+   * message from server
    */
-  componentWillMount() {
+  message?: string;
+}
+
+/**
+ * Hello World Component - demonstrate server call
+ */
+class HelloWorldComponent
+  extends React.Component<{}, HelloWorldComponentState> {
+
+  /**
+   * the hello world service
+   * @type {HelloWorldService}
+   */
+  service = new HelloWorldService();
+
+  /**
+   * initial state
+   * @type {{message: string}}
+   */
+  state: HelloWorldComponentState = {
+    message: "Loading..."
+  };
+
+  /**
+   * invoke server call on component Will Mount
+   */
+  async componentWillMount() {
+    try {
+
+      const message = await this.service.getMessage();
+      this.setState({message});
+
+    } catch (error) {
+      this.setState({message: `Error: ${error}`});
+    }
   }
 
   /**
-   * render the application
+   * Render message from server
+   * @return {any}
    */
   render() {
     return (
-      <div>
-        <NavigationBar/>
-        <div id="application">
-          <SidebarMenu/>
-          <div id="content">
-            {this.props.children}
-          </div>
-        </div>
-      </div>
+      <div>{this.state.message}</div>
     )
   }
 }
 
 
-/**
- * Module Application Props
- */
-interface ModuleApplicationProps {
-
-  /**
-   *list of modules
-   */
-  modules: [any];
-
-}
-
-/**
- * Modules applications
- */
-class ModuleApplication extends React.Component<ModuleApplicationProps, {}> {
-
-
-  /**
-   * Filter component by types
-   * @param type
-   */
-  filter(type: string) {
-    let components: any[] = [];
-
-    for (const module of this.props.modules as ModuleDefinition[]) {
-
-      React.Children.map(module.props.children, child => {
-        const name = child['type']['displayName'] || child['type']['name'];
-
-        if (name === type) {
-          components.push(child);
-        }
-      });
-    }
-
-    return components;
-  }
-
-  /**
-   * called when component started to mount
-   */
-  componentWillMount() {
-    appData.menus = this.filter("Menu") as Menu[];
-  }
-
-  /**
-   * get routes from modules
-   */
-  get routes() {
-    return this.filter("Route");
-  };
-
-  /**
-   *
-   * @returns {any}
-   */
-  render() {
-    return <Router history={browserHistory}>
-      <Route path="/" component={Application}>
-        {this.routes}
-      </Route>
-    </Router>
-  }
-}
-
 ReactDOM.render(
-  <ModuleApplication modules={[UserManagementModule]}/>,
+  <HelloWorldComponent />,
   document.querySelector("#root"));

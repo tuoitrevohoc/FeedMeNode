@@ -4,7 +4,7 @@ import * as jwt from "jsonwebtoken";
 import * as path from "path";
 
 import {User} from "./common/model/User";
-import {config} from "./server/Security";
+import {config} from "./common/server/Security";
 import {services} from "./services/index";
 
 
