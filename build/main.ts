@@ -220,7 +220,7 @@ function compileServer(outDir: string = "./dist/server") {
   options["outDir"] = outDir;
   options["moduleResolution"] = ts.ModuleResolutionKind.NodeJs;
 
-  const program = ts.createProgram(["application/ServerApplication.ts"],
+  const program = ts.createProgram(["application/ServerApplication.tsx"],
       options);
 
   program.emit();

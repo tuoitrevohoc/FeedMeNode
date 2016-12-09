@@ -1,18 +1,21 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import * as jwt from "jsonwebtoken";
-import * as path from "path";
+import * as React from "react";
 
 import {User} from "./common/model/User";
 import {config} from "./common/server/Security";
 import {services} from "./services/index";
+import {match, RouterContext} from "react-router";
+import {routes} from "./Routes";
+import {renderToString} from "react-dom/server";
+
 
 
 const application = express();
 
 /// use json body parser
 application.use(bodyParser.json());
-application.use(express.static(__dirname + "/../public"));
 
 /// run the application
 application.post("/remote/:service/:method", async (request, response) => {
@@ -65,11 +68,26 @@ application.post("/remote/:service/:method", async (request, response) => {
       exception
     }));
   }
+
+  return true;
 });
 
-application.use((request, response) => {
-  response.sendFile(path.join(__dirname, "../public/index.html"));
-});
+function handleRequest(request, response) {
+  match({routes, location: request.url},
+    (error, redirectLocation, renderProps) => {
+      if (error) {
+        response.send(500, error);
+      } else {
+        response.send(renderToString(
+          <RouterContext {...renderProps} />
+        ))
+      }
+    });
+}
+
+application.get("/", handleRequest);
+//application.use(express.static(__dirname + "/../public"));
+application.use(handleRequest);
 
 /// listen
 application.listen(process.env["PORT"] || 3000, () => {
